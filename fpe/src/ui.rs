@@ -3,6 +3,7 @@ use ratatui::{
 };
 
 use crate::app::App;
+use crate::finfo::FloatComponents;
 
 impl Widget for &mut App {
    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
@@ -36,17 +37,7 @@ impl Widget for &mut App {
         .render(layout[1], buf);
 
         // Render counter
-        Paragraph::new(format!("Counter: {}", self.counter()))
-        .block(
-            Block::default()
-                .title(" Values ")
-                .title_alignment(Alignment::Center)
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded),
-        )
-        .style(Style::default().fg(Color::Yellow))
-        .alignment(Alignment::Center)
-        .render(layout[2], buf);
+        FloatComponents::new(self.counter()).render(layout[0], buf);
     } 
 }
 
