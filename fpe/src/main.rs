@@ -1,109 +1,51 @@
-use std::io;
+// Application
+pub mod app;
 
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
-use ratatui::{
-    buffer::Buffer,
-    layout::Rect,
-    style::Stylize,
-    symbols::border,
-    text::{Line, Text},
-    widgets::{Block, Paragraph, Widget},
-    DefaultTerminal, Frame,
-};
+// Terminal event handler
+pub mod event;
 
-fn main() -> io::Result<()> {
-    ratatui::run(|terminal| App::default().run(terminal))
-    /*
-    let val: f64 = 10.87;
-    let fbits: u64 = val.to_bits();
-    println!("binary:   {0:#064b}", fbits);
-    let r: FloatComponents = deconstruct(val);
-    println!("sign:     {0:#b} ({0})", r.sign);
-    println!("exponent: {0:#011b} ({0})", r.exponent);
-    println!("offset:   {0:#0b} ({0})", r.offset);
-    */
-}
+// Widget renderer
+pub mod ui;
 
-#[derive(Debug, Default)]
-pub struct App {
-    counter: f64,
-    exit: bool,
-}
+// Terminal User Interface
+pub mod tui;
 
-impl App {
-    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
-        while !self.exit {
-            terminal.draw(|frame| self.draw(frame))?;
-            self.handle_events()?;
-        }
-        Ok(())
-    }
+// Application Updater
+pub mod update;
 
-    fn draw(&self, frame: &mut Frame){
-        frame.render_widget(self, frame.area());
-    }
+use app::App;
+use event::{Event, EventHandler};
+use ratatui::{backend::CrosstermBackend, Terminal};
+use tui::Tui;
+use update::update;
 
-    fn handle_events(&mut self) -> io::Result<()> {
-        match event::read()? {
-            // it's important to check that the event is a key press event as
-            // crossterm also emits key release and repeat events on Windows.
-            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                self.handle_key_event(key_event)
-            }
-            _ => {}
+fn main() -> anyhow::Result<()> {
+    // Create an application.
+    let mut app = App::new();
+
+    // Initialize the terminal user interface.
+    let backend = CrosstermBackend::new(std::io::stderr());
+    let terminal = Terminal::new(backend)?;
+    let events = EventHandler::new(250);
+    let mut tui = Tui::new(terminal, events);
+    tui.enter()?;
+
+    // Start the main loop.
+    while !app.should_quit() {
+        // Render the user interface.
+        tui.draw(&mut app)?;
+        // Handle events.
+        match tui.events.next()? {
+            Event::Tick => {}
+            Event::Key(key_event) => update(&mut app, key_event),
+            Event::Mouse(_) => {}
+            Event::Resize(_, _) => {}
         };
-        Ok(())
     }
 
-    fn handle_key_event(&mut self, key_event: KeyEvent) {
-        match key_event.code {
-            KeyCode::Char('q') => self.exit(),
-            KeyCode::Left => self.decrement_counter(),
-            KeyCode::Right => self.increment_counter(),
-            _ => {}
-        }
-    }
-    
-    fn exit(&mut self) {
-        self.exit = true;
-    }
-
-    fn increment_counter(&mut self) {
-        self.counter = self.counter.next_up();
-    }
-
-    fn decrement_counter(&mut self) {
-        self.counter = self.counter.next_down();
-    }
-}
-
-impl Widget for &App {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from(" Floating Point Explorer ".bold());
-        let instructions = Line::from(vec![
-            " Next Down ".into(),
-            "<Left>".blue().bold(),
-            " Increment ".into(),
-            "<Right>".blue().bold(),
-            " Quit ".into(),
-            "<Q>".blue().bold(),
-        ]);
-        let block = Block::bordered()
-            .title(title.centered())
-            .title_bottom(instructions.centered())
-            .border_set(border::THICK);
-
-        // TODO: replace this with showing the details of the number
-        let counter_text = Text::from(vec![Line::from(vec![
-                "Value: ".into(),
-                self.counter.to_string().yellow(),
-        ])]);
-
-        Paragraph::new(counter_text)
-            .centered()
-            .block(block)
-            .render(area, buf);
-    }
+    // Exit the user interface.
+    tui.exit()?;
+    Ok(())
 }
 
 struct FloatComponents {
@@ -125,5 +67,15 @@ fn deconstruct(n: f64) -> FloatComponents {
         offset: bits & offset_mask
     };
     return result;
+    /*
+    Rendering and such
+    let val: f64 = 10.87;
+    let fbits: u64 = val.to_bits();
+    println!("binary:   {0:#064b}", fbits);
+    let r: FloatComponents = deconstruct(val);
+    println!("sign:     {0:#b} ({0})", r.sign);
+    println!("exponent: {0:#011b} ({0})", r.exponent);
+    println!("offset:   {0:#0b} ({0})", r.offset);
+    */
 }
 
