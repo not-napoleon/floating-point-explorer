@@ -33,7 +33,7 @@ impl Widget for &mut App {
         )
         .style(Style::default().fg(Color::Yellow))
         .alignment(Alignment::Center)
-        .render(layout[0], buf);
+        .render(layout[1], buf);
 
         // Render counter
         Paragraph::new(format!("Counter: {}", self.counter()))
@@ -46,7 +46,7 @@ impl Widget for &mut App {
         )
         .style(Style::default().fg(Color::Yellow))
         .alignment(Alignment::Center)
-        .render(layout[1], buf);
+        .render(layout[2], buf);
     } 
 }
 
