@@ -10,6 +10,8 @@ pub fn update(app: &mut App, key_event: KeyEvent) {
         }
         KeyCode::Right | KeyCode::Char('j') => app.increment_counter(),
         KeyCode::Left | KeyCode::Char('k') => app.decrement_counter(),
+        KeyCode::Char('x') => app.hex_display(),
+        KeyCode::Char('b') => app.binary_display(),
         _ => {}
     };
 }

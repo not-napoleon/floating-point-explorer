@@ -6,23 +6,51 @@ const SIGN_MASK: u64 =     0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0
 const EXPONENT_MASK: u64 = 0b0111_1111_1111_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000;
 const OFFSET_MASK: u64 =   0b1000_0000_0000_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111;
 
+#[derive(Debug, Clone, Copy)]
+pub enum DisplayBase {
+    Hex,
+    Binary,
+}
+
 pub struct FloatComponents {
     num: f64,
     bits: u64,
     sign: u64,
     exponent: u64,
-    offset: u64
+    offset: u64,
+    base: DisplayBase,
 }
 
 impl FloatComponents {
-    pub fn new(n: f64) -> Self {
+    pub fn new(n: f64, b: DisplayBase) -> Self {
         let bits: u64 = n.to_bits();
         FloatComponents {
             num: n,
-            bits: bits,
+            bits,
             sign: (bits & SIGN_MASK) >> 63,
             exponent: (bits & EXPONENT_MASK) >> 52,
             offset: bits & OFFSET_MASK,
+            base: b,
+        }
+    }
+
+    fn format(&self) -> String {
+        match self.base {
+            DisplayBase::Binary => format!(
+            "value:    {4:e}\n\
+                binary:   {0:#064b}\n\
+                sign:     {1} ({1})\n\
+                exponent: {2:#011b}\n\
+                offset:   {3:#0b} ({3})",
+            self.bits, self.sign, self.exponent, self.offset, self.num),
+            DisplayBase::Hex => format!(
+            "value:    {4:e}\n\
+                binary:   {0:#016}\n\
+                sign:     {1} ({1})\n\
+                exponent: {2:#03x}\n\
+                offset:   {3:#0x} ({3})",
+            self.bits, self.sign, self.exponent, self.offset, self.num)
+
         }
     }
 }
@@ -33,12 +61,7 @@ impl Widget for FloatComponents {
         Self: Sized
     {
         
-        Paragraph::new(format!(
-               "value:    {4:e}\n\
-                binary:   {0:#064b}\n\
-                sign:     {1:#b} ({1})\n\
-                exponent: {2:#011b}\n\
-                offset:   {3:#0b} ({3})", self.bits, self.sign, self.exponent, self.offset, self.num))
+        Paragraph::new(self.format())
         .block(
             Block::default()
                 .title(" Values ")

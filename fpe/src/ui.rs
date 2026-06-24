@@ -23,6 +23,7 @@ impl Widget for &mut App {
             "
         Press `Esc`, `Ctrl-C` or `q` to stop running.\n\
         Press `j` and `k` to increment and decrement the counter respectively.\n\
+        Press `x` for hex display and `b` for binary display.\n\
       ",
         )
         .block(
@@ -37,7 +38,7 @@ impl Widget for &mut App {
         .render(layout[1], buf);
 
         // Render counter
-        FloatComponents::new(self.counter()).render(layout[0], buf);
+        FloatComponents::new(self.counter(), self.display_base()).render(layout[0], buf);
     } 
 }
 

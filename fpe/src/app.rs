@@ -1,14 +1,22 @@
+use crate::finfo::DisplayBase::{self, Hex};
+
 // Application
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct App {
     counter: f64,
     should_quit: bool,
+    display_base: DisplayBase,
 }
 
 impl App {
     /// Constructs a new instance of [`App`].
     pub fn new() -> Self {
-        Self::default()
+        App {
+            counter: 0.0,
+            should_quit: false,
+            display_base: Hex,
+        }
+
     }
 
     /// Handles the tick event of the terminal.
@@ -33,5 +41,23 @@ impl App {
 
     pub fn decrement_counter(&mut self) {
         self.counter = self.counter.next_down();
+    }
+
+    pub fn display_base(&self) -> DisplayBase {
+        self.display_base
+    }
+
+    pub fn binary_display(&mut self) {
+        self.display_base = DisplayBase::Binary
+    }
+
+    pub fn hex_display(&mut self) {
+        self.display_base = DisplayBase::Hex
+    }
+}
+
+impl Default for App {
+    fn default() -> App {
+        App::new()
     }
 }
