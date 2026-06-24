@@ -38,14 +38,14 @@ impl FloatComponents {
         match self.base {
             DisplayBase::Binary => format!(
             "value:    {4:e}\n\
-                binary:   {0:#064b}\n\
+                bits:   {0:#064b}\n\
                 sign:     {1} ({1})\n\
                 exponent: {2:#011b}\n\
                 offset:   {3:#0b} ({3})",
             self.bits, self.sign, self.exponent, self.offset, self.num),
             DisplayBase::Hex => format!(
             "value:    {4:e}\n\
-                binary:   {0:#016}\n\
+                bits:   {0:#016}\n\
                 sign:     {1} ({1})\n\
                 exponent: {2:#03x}\n\
                 offset:   {3:#0x} ({3})",
