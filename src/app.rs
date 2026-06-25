@@ -1,11 +1,19 @@
 use crate::finfo::DisplayBase::{self, Hex};
 
+#[derive(Debug, Clone, Copy)]
+pub enum ApplicationMode {
+    Counter,
+    EnterNumber,
+    SelectSpecial,
+}
+
 // Application
 #[derive(Debug)]
 pub struct App {
     counter: f64,
     should_quit: bool,
     display_base: DisplayBase,
+    mode: ApplicationMode,
 }
 
 impl App {
@@ -15,6 +23,7 @@ impl App {
             counter: 0.0,
             should_quit: false,
             display_base: Hex,
+            mode: ApplicationMode::Counter,
         }
 
     }
@@ -53,6 +62,14 @@ impl App {
 
     pub fn hex_display(&mut self) {
         self.display_base = DisplayBase::Hex
+    }
+
+    pub fn mode(&self) -> ApplicationMode {
+        self.mode
+    }
+
+    pub fn set_mode(&mut self, mode: ApplicationMode) {
+        self.mode = mode
     }
 }
 
