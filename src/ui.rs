@@ -14,7 +14,7 @@ impl Widget for &mut App {
             Counter => self.render_counter_mode(area, buf),
             EnterNumber => self.render_enter_number_mode(area, buf),
             SelectSpecial => {},
-            ParseError => {},
+            ParseError => self.render_parse_error(area, buf),
         }
     }
 }
@@ -50,6 +50,39 @@ impl App {
         )
         .style(Style::default().fg(Color::Yellow))
         .alignment(Alignment::Left)
+        .render(layout[2], buf);
+    }
+
+    fn render_parse_error(
+        &self,
+        area: ratatui::prelude::Rect,
+        buf: &mut ratatui::prelude::Buffer,
+    ) {
+
+        let layout = Layout::default()
+            .direction(ratatui::layout::Direction::Vertical)
+            .constraints(vec![
+                Constraint::Percentage(50), 
+                Constraint::Percentage(40),
+                Constraint::Percentage(10),
+            ])
+            .split(area);
+
+        // Render counter
+        FloatComponents::new(self.counter(), self.display_base()).render(layout[0], buf);
+        // render instructions
+        render_instructions(layout[1], buf);
+        // Render input box
+        Paragraph::new(
+            "Invalid number format, press any key to continue"
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded),
+        )
+        .style(Style::default().fg(Color::Red))
+        .alignment(Alignment::Center)
         .render(layout[2], buf);
 
     }

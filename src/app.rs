@@ -84,7 +84,7 @@ impl App {
         self.set_mode(EnterNumber);
     }
 
-    pub fn end_enter_mode(&mut self) {
+    pub fn parse_input(&mut self) {
         match self.input_text.parse() {
             Ok(v) => {
                 self.set_counter(v);
@@ -92,6 +92,10 @@ impl App {
             },
             Err(_) => self.set_mode(ParseError)
         }
+    }
+
+    pub fn abort_enter_number(&mut self) {
+        self.set_mode(Counter)
     }
 
     pub fn reset_input(&mut self){
@@ -103,7 +107,7 @@ impl App {
     }
 
     pub fn input_prompt(&self) -> String {
-            format!("Enter a number: {0}", self.input_text)
+            format!("Enter a number (<Esc> to cancel): {0}", self.input_text)
     }
 }
 

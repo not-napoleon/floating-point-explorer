@@ -7,13 +7,13 @@ pub fn update(app: &mut App, key_event: KeyEvent) {
             Counter => update_counter_mode(app, key_event),
             EnterNumber => update_enter_number_mode(app, key_event),
             SelectSpecial => {},
-            ParseError => {},
+            ParseError => app.abort_enter_number(),
         }
 }
 
 pub fn update_enter_number_mode(app: &mut App, key_event: KeyEvent) {
     match key_event.code {
-        KeyCode::Enter => app.end_enter_mode(),
+        KeyCode::Enter => app.parse_input(),
         KeyCode::Char('0') | 
         KeyCode::Char('1') | 
         KeyCode::Char('2') | 
@@ -25,6 +25,7 @@ pub fn update_enter_number_mode(app: &mut App, key_event: KeyEvent) {
         KeyCode::Char('8') | 
         KeyCode::Char('9') | 
         KeyCode::Char('.') => app.append_input_char(key_event.code.as_char().unwrap()), 
+        KeyCode::Esc => app.abort_enter_number(),
         _ => {}
     }
 }
