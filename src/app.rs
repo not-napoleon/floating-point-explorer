@@ -1,10 +1,11 @@
-use crate::finfo::DisplayBase::{self, Hex};
+use crate::{app::ApplicationMode::{Counter, EnterNumber, ParseError}, finfo::DisplayBase::{self, Hex}};
 
 #[derive(Debug, Clone, Copy)]
 pub enum ApplicationMode {
     Counter,
     EnterNumber,
     SelectSpecial,
+    ParseError,
 }
 
 // Application
@@ -14,6 +15,7 @@ pub struct App {
     should_quit: bool,
     display_base: DisplayBase,
     mode: ApplicationMode,
+    input_text: String,
 }
 
 impl App {
@@ -24,6 +26,7 @@ impl App {
             should_quit: false,
             display_base: Hex,
             mode: ApplicationMode::Counter,
+            input_text: String::new(),
         }
 
     }
@@ -52,6 +55,10 @@ impl App {
         self.counter = self.counter.next_down();
     }
 
+    pub fn set_counter(&mut self, num: f64) {
+        self.counter = num
+    }
+
     pub fn display_base(&self) -> DisplayBase {
         self.display_base
     }
@@ -68,8 +75,35 @@ impl App {
         self.mode
     }
 
-    pub fn set_mode(&mut self, mode: ApplicationMode) {
+    fn set_mode(&mut self, mode: ApplicationMode) {
         self.mode = mode
+    }
+
+    pub fn start_enter_mode(&mut self) {
+        self.reset_input();
+        self.set_mode(EnterNumber);
+    }
+
+    pub fn end_enter_mode(&mut self) {
+        match self.input_text.parse() {
+            Ok(v) => {
+                self.set_counter(v);
+                self.set_mode(Counter);
+            },
+            Err(_) => self.set_mode(ParseError)
+        }
+    }
+
+    pub fn reset_input(&mut self){
+        self.input_text = String::new()
+    }
+
+    pub fn append_input_char(&mut self, c: char) {
+        self.input_text.push(c)
+    }
+
+    pub fn input_prompt(&self) -> String {
+            format!("Enter a number: {0}", self.input_text)
     }
 }
 
